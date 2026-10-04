@@ -14,9 +14,10 @@ enum Platform {
 }
 
 message Device {
-  string name = 1;
-  Platform platform = 2;
-  string app_version = 3;
+  optional uuid.v1.UuId device_id = 1;
+  optional string name = 2;
+  optional Platform platform = 3;
+  optional string app_version = 4;
 }
 
 service DeviceService {

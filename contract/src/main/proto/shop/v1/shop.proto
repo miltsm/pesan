@@ -10,7 +10,7 @@ import "uuid/v1/uuid.proto";
 option go_package = "github.com/miltsm/pesan/backend/proto/shop/v1;shopv1";
 
 service ShopService {
-  rpc CreateNewShop(CreateNewShopRequest) returns (CreateNewShopRequest);
+  rpc CreateNewShop(CreateNewShopRequest) returns (CreateNewShopResponse);
   rpc GetShops(GetShopsRequest) returns (GetShopsResponse);
   rpc ShopDeviceStatus(ShopDeviceStatusRequest) returns (ShopDeviceStatusResponse);
   rpc OpenShop(OpenShopRequest) returns (OpenShopResponse);

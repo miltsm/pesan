@@ -13,7 +13,7 @@ option go_package = "github.com/miltsm/pesan/backend/proto/auth/v1;authv1";
 message PublicKeyRequest {
   bytes signed = 1;
   optional string user_handle = 2;
-  device.v1.Device device_info = 3;
+  optional device.v1.Device device_info = 3;
 }
 
 message PublicKeyOption {
@@ -36,7 +36,7 @@ message UserSession {
 // NOTE: ONBOARD
 service OnboardService {
   rpc PublicKeyOnboard(PublicKeyOnboardRequest) returns (PublicKeyOnboardResponse);
-  rpc VerifyOnboardPublicKey(VerifyOnboardPublicKeyRequest) returns (VerifyOnboardPublicKeyRequest);
+  rpc VerifyOnboardPublicKey(VerifyOnboardPublicKeyRequest) returns (VerifyOnboardPublicKeyResponse);
   rpc PasswordOnboard(PasswordOnboardRequest) returns (PasswordOnboardResponse);
 }
 
@@ -103,8 +103,8 @@ message PasswordLoginResponse {
 
 // NOTE: RE-AUTH
 service ReAuthService {
-  rpc RefreshSession(RefreshSessionRequest) returns (RefreshSessionResponse);
-  rpc ReAuth(ReAuthRequest) returns (ReAuthResponse);
+  rpc RefreshSession(RefreshSessionRequest) returns (Session);
+  rpc ReAuth(google.protobuf.Empty) returns (PublicKeyOption);
   rpc VerifyPublicKey(VerifyPublicKeyRequest) returns (VerifyPublicKeyResponse);
   rpc PasswordReAuth(PasswordReAuthRequest) returns (PasswordReAuthResponse);
 }

@@ -1,0 +1,13 @@
+<?xml  version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="username_label">Username</string>
+    <string name="password_label">Password</string>
+    <string name="sign_in_w_password">Sign in with Password</string>
+    <string name="sign_in_w_passkey">Sign in with Passkey</string>
+    <string name="sign_up">Sign up</string>
+    <string name="name">Name</string>
+    <string name="signing_in">Signing in</string>
+    <string name="why_passkey">A passkey is a faster and safer way to sign in than a password. Your account is created with one unless you choose another option.</string>
+    <string name="how_passkeys_work"><b>How passkeys work</b></string>
+    <string name="alt_sign_up">Other ways to sign in</string>
+</resources>

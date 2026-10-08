@@ -1,6 +1,41 @@
 name: pesan
 
 services:
+  db:
+    image: postgres
+    restart: always
+    user: postgres
+    secrets:
+      - db-password
+    volumes:
+      - mdd-data:/var/lib/postgresql
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    environment:
+      - POSTGRES_USER=mildotdev
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+    expose:
+      - ${POSTGRES_PORT}
+    healthcheck:
+      test: ["CMD", "pg_isready -U app -d appdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mdd-network
+      
+  admin:
+    image: dpage/pgadmin4
+    secrets:
+      - db-password
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/db-password
+    ports:
+      - "5050:80"
+    networks:
+      - mdd-network
+      
   be:
     build:
       context: .
@@ -21,38 +56,56 @@ services:
       ACCESS_JWT_LIFESPAN: ${ACCESS_JWT_LIFESPAN}
       REFRESH_JWT_LIFESPAN: ${REFRESH_JWT_LIFESPAN}
       PASSKEY_DURATION: ${PASSKEY_DURATION}
-      ACCESS_SECRET_PATH: ${ACCESS_TOKEN_SECRET}
-      REFRESH_SECRET_PATH: ${REFRESH_TOKEN_SECRET}
+      ACCESS_SECRET_PATH: run/secrets/access-secret 
+      REFRESH_SECRET_PATH: run/secrets/refresh-secret 
       NATS_HOST: ${NATS_HOST}
       NATS_PORT: ${NATS_PORT}
       FIREBASE_SDK_PATH: /run/secrets/fb-service-acc
       ANDROID_KEY_HASH: ${ANDROID_KEY_HASH}
     secrets:
       - db-password
+      - access-secret
+      - refresh-secret
+    depends_on:
+      - db
+      - o4b-nats
     networks:
-      - shared-network
-
-  proxy:
-    image: nginx:latest
+      - mdd-network
+      
+  o4b-nats:
+    image: nats:latest
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./well-known:/usr/share/nginx/html/.well-known:ro
-      - ./server.crt:/etc/nginx/server.crt:ro
-      - ./proxy/server.key:/etc/nginx/server.key:ro
+      - "4222:4222"
+      - "8222:8222"
     networks:
-      - shared-network
-    restart: unless-stopped
+     - mdd-network
+
+  #proxy:
+  #  image: nginx:latest
+  #  ports:
+  #    - "80:80"
+  #    - "443:443"
+  #  volumes:
+  #    - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #    - ./well-known:/usr/share/nginx/html/.well-known:ro
+  #    - ./server.crt:/etc/nginx/server.crt:ro
+  #    - ./proxy/server.key:/etc/nginx/server.key:ro
+  #  networks:
+  #    - shared-network
+  #  restart: unless-stopped
 
 networks:
-  shared-network:
-    name: mildotdev-network
-    external: true
+  mdd-network:
 
 secrets:
   db-password:
-    file: db/password.txt
+    file: secrets/db.txt
+  access-secret:
+    file: secrets/access.txt
+  refresh-secret:
+    file: secrets/refresh.txt
   fb-service-acc:
     file: firebase/service-account.json
+
+volumes:
+  mdd-data:

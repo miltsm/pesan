@@ -17,7 +17,7 @@ services:
     expose:
       - ${POSTGRES_PORT}
     healthcheck:
-      test: ["CMD", "pg_isready -U app -d appdb"]
+      test: ["CMD", "pg_isready"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -35,7 +35,7 @@ services:
       - "5050:80"
     networks:
       - mdd-network
-      
+
   be:
     build:
       context: .

@@ -20,9 +20,9 @@ import (
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	pesanAuth "github.com/miltsm/pesan-backend/proto/auth/v1"
-	pesanDevice "github.com/miltsm/pesan-backend/proto/device/v1"
-	pesanShop "github.com/miltsm/pesan-backend/proto/shop/v1"
+	pesanAuth "github.com/miltsm/pesan/backend/proto/auth/v1"
+	pesanDevice "github.com/miltsm/pesan/backend/proto/device/v1"
+	pesanShop "github.com/miltsm/pesan/backend/proto/shop/v1"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 
@@ -89,7 +89,7 @@ func main() {
 	var lis net.Listener
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", os.Getenv("HOST"), port))
 	if err != nil {
-		log.Fatalf("[FATAL] %s\n", err.Error())
+		log.Fatalf("[FATAL] main.go - line 92 %s\n", err.Error())
 		db.Close()
 		return
 	}
@@ -105,7 +105,7 @@ func main() {
 	fmt.Printf("[INFO] listening to port: %d..\n", port)
 	err = srv.Serve(lis)
 	if err != nil {
-		log.Fatalf("[FATAL] %s\n", err.Error())
+		log.Fatalf("[FATAL] main.go - line 108 %s\n", err.Error())
 		db.Close()
 	}
 }
@@ -134,28 +134,28 @@ func setEnvs() {
 
 	accessJwtLifespan, err = strconv.Atoi(os.Getenv("ACCESS_JWT_LIFESPAN"))
 	if err != nil {
-		log.Fatalf("[FATAL] %v", err)
+		log.Fatalf("[FATAL] main.go - line 137 %v", err)
 	}
 
 	refreshJwtLifespan, err = strconv.Atoi(os.Getenv("REFRESH_JWT_LIFESPAN"))
 	if err != nil {
-		log.Fatalf("[FATAL] %v", err)
+		log.Fatalf("[FATAL] main.go - line 142 %v", err)
 	}
 
 	passkeyDuration, err = strconv.Atoi(os.Getenv("PASSKEY_DURATION"))
 	if err != nil {
-		log.Fatalf("[FATAL] %v", err)
+		log.Fatalf("[FATAL] main.go - line 147 %v", err)
 	}
 
 	accessSecret, err = os.ReadFile(os.Getenv("ACCESS_SECRET_PATH"))
 	if err != nil {
-		log.Fatalf("[FATAL] %v", err)
+		log.Fatalf("[FATAL] main.go - line 152 %v", err)
 		return
 	}
 
 	refreshSecret, err = os.ReadFile(os.Getenv("REFRESH_SECRET_PATH"))
 	if err != nil {
-		log.Fatalf("[FATAL] %v", err)
+		log.Fatalf("[FATAL] main.go - line 158 %v", err)
 		return
 	}
 }
@@ -330,7 +330,7 @@ const (
 func establishDb() {
 	pwd, err := os.ReadFile(os.Getenv("POSTGRES_PASSWORD_FILE"))
 	if err != nil {
-		log.Fatalf("[FATAL] %v\n", err)
+		log.Fatalf("[FATAL] main.go - line 333 %v\n", err)
 		return
 	}
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
@@ -720,15 +720,20 @@ func establishNats() {
 // NOTE: core - Firebase
 func establishFirebase() {
 	opt := option.WithCredentialsFile(os.Getenv("FIREBASE_SDK_PATH"))
+
+	config := &firebase.Config{
+		ProjectID: os.Getenv("FIREBASE_PROJECT_ID"),
+	}
+
 	var err error
-	fb, err = firebase.NewApp(context.Background(), nil, opt)
+	fb, err = firebase.NewApp(context.Background(), config, opt)
 	if err != nil {
 		log.Fatalf("[FATAL] Failed to establish firebase: %v\n", err)
 	}
 
 	fbMsgClient, err = fb.Messaging(context.Background())
 	if err != nil {
-		log.Fatalf("[FATAL] Failed to setup fb messaging client")
+		log.Fatalf("[FATAL] Failed to setup fb messaging client: %v\n", err)
 	}
 
 	fmt.Println("[INFO] Firebase Admin establish!")

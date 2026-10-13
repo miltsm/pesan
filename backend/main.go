@@ -186,8 +186,16 @@ func logger(format string, a ...any) {
 }
 
 func valid(ctx context.Context, methodName string) (*context.Context, error) {
-	if strings.HasPrefix(methodName, "/pesan.Public") {
-		return &ctx, nil
+	publics := []string{
+		"/auth.v1.OnboardService/",
+		"/auth.v1.AuthService/",
+		"/auth.v1.ReAuthService/",
+	}
+
+	for _, public := range publics {
+		if strings.HasPrefix(methodName, public) {
+			return &ctx, nil
+		}
 	}
 
 	md, ok := metadata.FromIncomingContext(ctx)
